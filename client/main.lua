@@ -38,11 +38,28 @@ Citizen.CreateThread(function()
 						if Config.ActiveLSC then
 							if enough then
 								Citizen.Wait(10)
-								exports.mythic_notify:DoHudText('inform', 'Our mechanic is busy. Go to main mechanic!')
+								if Config.useMythic then
+									if Config.usepNotify then
+										exports.pNotify:SendNotification({text = _U('enoughlsc_message'), type = "info", timeout = 2500})
+									else
+										exports.mythic_notify:DoHudText('inform', _U('enoughlsc_message'))
+									end
+								else
+									return
+								end
 							elseif not enough then
 								if IsPedInAnyVehicle(ped, false) then
 									SetVehicleDoorsLocked(vehicle, 4)
-									exports.mythic_notify:DoHudText('inform', 'Your car is being taken care of')
+
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('start_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('start_message'))
+										end
+									else
+										return
+									end
 
 									FreezeEntityPosition(vehicle, true)
 
@@ -58,16 +75,41 @@ Citizen.CreateThread(function()
 
 									TriggerServerEvent('esx_automech:pay')
 
-									exports.mythic_notify:DoHudText('inform', 'Isnt this car beatifull now?')
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('success_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('success_message'))
+										end
+									else
+										return
+									end
 								else
-									exports.mythic_notify:DoHudText('inform', 'You want me to repair your brain?')
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('nocar_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('nocar_message'))
+										end
+									else
+										return
+									end
 								end
 							end
 						else
 							if IsControlJustPressed(1, 46) then
 								if IsPedInAnyVehicle(ped, false) then
 									SetVehicleDoorsLocked(vehicle, 4)
-									exports.mythic_notify:DoHudText('inform', 'Your car is being taken care of')
+
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('start_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('start_message'))
+										end
+									else
+										return
+									end
 								
 									FreezeEntityPosition(vehicle, true)
 
@@ -83,9 +125,25 @@ Citizen.CreateThread(function()
 
 									TriggerServerEvent('esx_automech:pay')
 
-									exports.mythic_notify:DoHudText('inform', 'Isnt this car beatifull now?')
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('success_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('success_message'))
+										end
+									else
+										return
+									end
 								else
-									exports.mythic_notify:DoHudText('inform', 'You want me to repair your brain?')
+									if Config.useMythic then
+										if Config.usepNotify then
+											exports.pNotify:SendNotification({text = _U('nocar_message'), type = "info", timeout = 2500})
+										else
+											exports.mythic_notify:DoHudText('inform', _U('nocar_message'))
+										end
+									else
+										return
+									end
 								end
 							end
 						end
@@ -99,17 +157,19 @@ end)
 Citizen.CreateThread(function()
 	for k,v in pairs(Config.Zones) do
 		for i = 1, #v.MechInteract, 1 do
-			local blip = AddBlipForCoord(v.MechInteract[i])
+			if Config.AddBlips then
+				local blip = AddBlipForCoord(v.MechInteract[i])
 
-			SetBlipSprite (blip, v.Blip.Sprite)
-			SetBlipDisplay(blip, v.Blip.Display)
-			SetBlipScale  (blip, v.Blip.Scale)
-			SetBlipColour (blip, v.Blip.Colour)
-			SetBlipAsShortRange(blip, true)
+				SetBlipSprite (blip, v.Blip.Sprite)
+				SetBlipDisplay(blip, v.Blip.Display)
+				SetBlipScale  (blip, v.Blip.Scale)
+				SetBlipColour (blip, v.Blip.Colour)
+				SetBlipAsShortRange(blip, true)
 
-			BeginTextCommandSetBlipName('STRING')
-			AddTextComponentSubstringPlayerName('Mechanik')
-			EndTextCommandSetBlipName(blip)
+				BeginTextCommandSetBlipName('STRING')
+				AddTextComponentSubstringPlayerName('Mechanik')
+				EndTextCommandSetBlipName(blip)
+			end
 		end
 	end
 end)
