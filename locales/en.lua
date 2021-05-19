@@ -1,4 +1,6 @@
 Locales['en'] = {
+    ['inf_text'] = 'Press [E] to get mechanic\'s attention',
+
     ['start_message'] = 'I\'ll get right onto that',
     ['success_message'] = 'Work done. Hope you enjoy!',
 
