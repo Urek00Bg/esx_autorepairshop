@@ -27,13 +27,30 @@ Citizen.CreateThread(function()
 
 		local ped = GetPlayerPed(-1)
 		local playercoord = GetEntityCoords(ped)
+
+		for k,v in pairs(Config.Zones) do
+			for i=1, #v.MechInteract, 1 do
+				if Vdist2(v.MechInteract[i], playercoord) < Config.DrawDistanceText then
+					DrawText3Ds(v.MechInteract[i].x, v.MechInteract[i].y, v.MechInteract[i].z, _U('inf_text'))
+				end
+			end
+		end
+	end
+end)
+
+Citizen.CreateThread(function()
+	while true do
+
+		Citizen.Wait(1)
+
+		local ped = GetPlayerPed(-1)
+		local playercoord = GetEntityCoords(ped)
 		local vehicle = GetVehiclePedIsIn(ped, false)
 
 		for k,v in pairs(Config.Zones) do
 			for i=1, #v.MechInteract, 1 do
 
-				if Vdist2(v.MechInteract[i], playercoord) < 3 then
-					DrawText3Ds(v.MechInteract[i].x, v.MechInteract[i].y, v.MechInteract[i].z, 'Press [E] to get mechanic attention')
+				if Vdist2(v.MechInteract[i], playercoord) < Config.InteractDistance then
 					if IsControlJustPressed(1, 46) then
 						if Config.ActiveLSC then
 							if enough then
@@ -178,16 +195,16 @@ function DrawText3Ds(x, y, z, text)
 	local onScreen,_x,_y=World3dToScreen2d(x,y,z)
 	local factor = #text / 460
 	local px,py,pz=table.unpack(GetGameplayCamCoords())
-	
-	SetTextScale(0.3, 0.3)
-	SetTextFont(6)
+			
+	SetTextScale(Config.TextX, Config.TextY)
+	SetTextFont(Config.FontType)
 	SetTextProportional(1)
-	SetTextColour(255, 255, 255, 160)
+	SetTextColour(Config.Red, Config.Green, Config.Blue, Config.Alpha)
 	SetTextEntry("STRING")
 	SetTextCentre(1)
 	AddTextComponentString(text)
 	DrawText(_x,_y)
-	DrawRect(_x,_y + 0.0115, 0.02 + factor, 0.027, 28, 28, 28, 95)
+	DrawRect(_x,_y + Config.RectangleX, Config.RectangleW + factor, Config.RectangleH, Config.RectRed, Config.RectGreen, Config.RectBlue, Config.RectAlpha)
 end
 
 RegisterNetEvent('esx_automech:set')
