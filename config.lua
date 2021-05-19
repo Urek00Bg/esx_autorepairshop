@@ -6,24 +6,50 @@ Config.Zones = {
 
 	LSCM = {
 
-		Blip = {
-				Sprite  = 402,
-				Display = 4,
-				Scale   = 0.7,
-				Colour  = 29
-			},
+        Blip = {
+			Sprite  = 402,
+			Display = 4,
+			Scale   = 0.7,
+			Colour  = 29
+		},
 
-			MechInteract = {
-				vector3(1139.15, -778.52, 57.18),
-				vector3(1143.6, -778.52, 57.18),
-				vector3(-210.97, -1323.55, 30.89),
-				vector3(-336.53, -136.13, 39.01),
-				vector3(-1154.76, -2006.3, 13.18),
-			},
+		MechInteract = {
+			vector3(1139.15, -778.52, 57.18),
+            vector3(1143.6, -778.52, 57.18),
+            vector3(-210.97, -1323.55, 30.89),
+            vector3(-336.53, -136.13, 39.01),
+            vector3(-1154.76, -2006.3, 13.18),
+		},
 
 	}
 
 }
+-- Text configs
+Config.Red = 255
+Config.Green = 255
+Config.Blue = 255
+Config.Alpha = 160
+
+Config.TextX = 0.3
+Config.TextY = 0.3
+
+Config.FontType = 6
+
+Config.DrawDistanceText = 5
+
+--Rectangle or background of text
+Config.RectangleX = 0.0115
+
+Config.RectangleH = 0.027
+Config.RectangleW = 0.02
+
+Config.RectRed = 28
+Config.RectGreen = 28
+Config.RectBlue = 28
+Config.RectAlpha = 95
+
+--Other
+Config.InteractDistance = 3
 
 Config.useMythic = true -- this thing here makes script use mythic_notify. If you want pNotify then leave it on true and just turn on usepNotify
 Config.usepNotify = false -- this thing here makes script use pNotify. If you want pNotify then leave it on true and turn on useMythic. Else leave this on false.
