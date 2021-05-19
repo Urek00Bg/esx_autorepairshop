@@ -1,4 +1,6 @@
 Locales['pl'] = {
+    ['inf_text'] = 'Naciśnij [E] Aby zawołać mechanika',
+
     ['start_message'] = 'Już się zabieram za to autko',
     ['success_message'] = 'Zrobione. Mi się podoba. A tobie?',
 
