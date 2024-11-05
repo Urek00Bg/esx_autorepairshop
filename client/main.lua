@@ -1,13 +1,7 @@
-ESX              = nil
+ESX = exports['es_extended']:getSharedObject()
 local PlayerData = {}
 
-Citizen.CreateThread(function()
-	while ESX == nil do
-		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
-		Citizen.Wait(0)
-	end
-end)
-
+-- Player data initialization
 RegisterNetEvent('esx:playerLoaded')
 AddEventHandler('esx:playerLoaded', function(xPlayer)
   PlayerData = xPlayer   
@@ -20,16 +14,16 @@ end)
 
 local enough = false
 
+-- Display text at mechanic interaction points
 Citizen.CreateThread(function()
 	while true do
-
 		Citizen.Wait(1)
 
-		local ped = GetPlayerPed(-1)
+		local ped = PlayerPedId()
 		local playercoord = GetEntityCoords(ped)
 
-		for k,v in pairs(Config.Zones) do
-			for i=1, #v.MechInteract, 1 do
+		for k, v in pairs(Config.Zones) do
+			for i = 1, #v.MechInteract, 1 do
 				if Vdist2(v.MechInteract[i], playercoord) < Config.DrawDistanceText then
 					DrawText3Ds(v.MechInteract[i].x, v.MechInteract[i].y, v.MechInteract[i].z, _U('inf_text'))
 				end
@@ -38,131 +32,27 @@ Citizen.CreateThread(function()
 	end
 end)
 
+-- Mechanic interaction and vehicle repair
 Citizen.CreateThread(function()
 	while true do
-
 		Citizen.Wait(1)
 
-		local ped = GetPlayerPed(-1)
+		local ped = PlayerPedId()
 		local playercoord = GetEntityCoords(ped)
 		local vehicle = GetVehiclePedIsIn(ped, false)
 
-		for k,v in pairs(Config.Zones) do
-			for i=1, #v.MechInteract, 1 do
-
+		for k, v in pairs(Config.Zones) do
+			for i = 1, #v.MechInteract, 1 do
 				if Vdist2(v.MechInteract[i], playercoord) < Config.InteractDistance then
 					if IsControlJustPressed(1, 46) then
 						if Config.ActiveLSC then
 							if enough then
-								Citizen.Wait(10)
-								if Config.useMythic then
-									if Config.usepNotify then
-										exports.pNotify:SendNotification({text = _U('enoughlsc_message'), type = "info", timeout = 2500})
-									else
-										exports.mythic_notify:DoHudText('inform', _U('enoughlsc_message'))
-									end
-								else
-									return
-								end
-							elseif not enough then
-								if IsPedInAnyVehicle(ped, false) then
-									SetVehicleDoorsLocked(vehicle, 4)
-
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('start_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('start_message'))
-										end
-									else
-										return
-									end
-
-									FreezeEntityPosition(vehicle, true)
-
-									Citizen.Wait(Config.WaitTime)
-
-									SetVehicleFixed(vehicle)
-									SetVehicleDeformationFixed(vehicle)
-									SetVehicleUndriveable(vehicle, false)
-									SetVehicleEngineOn(vehicle, true, true)
-
-									SetVehicleDoorsLocked(vehicle, 0)
-									FreezeEntityPosition(vehicle, false)
-
-									TriggerServerEvent('esx_automech:pay')
-
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('success_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('success_message'))
-										end
-									else
-										return
-									end
-								else
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('nocar_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('nocar_message'))
-										end
-									else
-										return
-									end
-								end
+								Notify(_U('enoughlsc_message'))
+							else
+								HandleRepairProcess(vehicle)
 							end
 						else
-							if IsControlJustPressed(1, 46) then
-								if IsPedInAnyVehicle(ped, false) then
-									SetVehicleDoorsLocked(vehicle, 4)
-
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('start_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('start_message'))
-										end
-									else
-										return
-									end
-								
-									FreezeEntityPosition(vehicle, true)
-
-									Citizen.Wait(Config.WaitTime)
-
-									SetVehicleFixed(vehicle)
-									SetVehicleDeformationFixed(vehicle)
-									SetVehicleUndriveable(vehicle, false)
-									SetVehicleEngineOn(vehicle, true, true)
-
-									SetVehicleDoorsLocked(vehicle, 0)
-									FreezeEntityPosition(vehicle, false)
-
-									TriggerServerEvent('esx_automech:pay')
-
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('success_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('success_message'))
-										end
-									else
-										return
-									end
-								else
-									if Config.useMythic then
-										if Config.usepNotify then
-											exports.pNotify:SendNotification({text = _U('nocar_message'), type = "info", timeout = 2500})
-										else
-											exports.mythic_notify:DoHudText('inform', _U('nocar_message'))
-										end
-									else
-										return
-									end
-								end
-							end
+							HandleRepairProcess(vehicle)
 						end
 					end
 				end
@@ -171,30 +61,64 @@ Citizen.CreateThread(function()
 	end
 end)
 
+-- Blip creation for mechanic locations
 Citizen.CreateThread(function()
-	for k,v in pairs(Config.Zones) do
+	for k, v in pairs(Config.Zones) do
 		for i = 1, #v.MechInteract, 1 do
 			if Config.AddBlips then
 				local blip = AddBlipForCoord(v.MechInteract[i])
 
-				SetBlipSprite (blip, v.Blip.Sprite)
+				SetBlipSprite(blip, v.Blip.Sprite)
 				SetBlipDisplay(blip, v.Blip.Display)
-				SetBlipScale  (blip, v.Blip.Scale)
-				SetBlipColour (blip, v.Blip.Colour)
+				SetBlipScale(blip, v.Blip.Scale)
+				SetBlipColour(blip, v.Blip.Colour)
 				SetBlipAsShortRange(blip, true)
 
 				BeginTextCommandSetBlipName('STRING')
-				AddTextComponentSubstringPlayerName('Mechanik')
+				AddTextComponentSubstringPlayerName('Mechanic')
 				EndTextCommandSetBlipName(blip)
 			end
 		end
 	end
 end)
 
+-- Helper functions
+function Notify(message)
+	if Config.useMythic then
+		if Config.usepNotify then
+			exports.pNotify:SendNotification({text = message, type = "info", timeout = 2500})
+		else
+			exports.mythic_notify:DoHudText('inform', message)
+		end
+	end
+end
+
+function HandleRepairProcess(vehicle)
+	if IsPedInAnyVehicle(PlayerPedId(), false) then
+		SetVehicleDoorsLocked(vehicle, 4)
+		Notify(_U('start_message'))
+		FreezeEntityPosition(vehicle, true)
+
+		Citizen.Wait(Config.WaitTime)
+
+		SetVehicleFixed(vehicle)
+		SetVehicleDeformationFixed(vehicle)
+		SetVehicleUndriveable(vehicle, false)
+		SetVehicleEngineOn(vehicle, true, true)
+		SetVehicleDoorsLocked(vehicle, 0)
+		FreezeEntityPosition(vehicle, false)
+
+		TriggerServerEvent('esx_automech:pay')
+		Notify(_U('success_message'))
+	else
+		Notify(_U('nocar_message'))
+	end
+end
+
 function DrawText3Ds(x, y, z, text)
-	local onScreen,_x,_y=World3dToScreen2d(x,y,z)
+	local onScreen, _x, _y = World3dToScreen2d(x, y, z)
 	local factor = #text / 460
-	local px,py,pz=table.unpack(GetGameplayCamCoords())
+	local px, py, pz = table.unpack(GetGameplayCamCoords())
 			
 	SetTextScale(Config.TextX, Config.TextY)
 	SetTextFont(Config.FontType)
@@ -203,25 +127,21 @@ function DrawText3Ds(x, y, z, text)
 	SetTextEntry("STRING")
 	SetTextCentre(1)
 	AddTextComponentString(text)
-	DrawText(_x,_y)
-	DrawRect(_x,_y + Config.RectangleX, Config.RectangleW + factor, Config.RectangleH, Config.RectRed, Config.RectGreen, Config.RectBlue, Config.RectAlpha)
+	DrawText(_x, _y)
+	DrawRect(_x, _y + Config.RectangleX, Config.RectangleW + factor, Config.RectangleH, Config.RectRed, Config.RectGreen, Config.RectBlue, Config.RectAlpha)
 end
 
+-- Mechanic job online check
 RegisterNetEvent('esx_automech:set')
 AddEventHandler('esx_automech:set', function(jobs_online)
 	jobs = jobs_online
-
-    if jobs['mechanic'] < Config.LSCinService then
-        enough = false
-    elseif jobs['mechanic'] >= Config.LSCinService then
-        enough = true
-    end
+	enough = jobs['mechanic'] >= Config.LSCinService
 end)
 
+-- Trigger the server to get the mechanic job count
 Citizen.CreateThread(function() 
 	while true do
 		TriggerServerEvent('esx_automech:get')
-
 		Wait(Config.LSCrefreshtime)
 	end
 end)
